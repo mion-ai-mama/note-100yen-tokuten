@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ビルド工程なしの静的サイトのため、依存インストール・ビルドは行わない。
+      # 壊れたページが公開されることを防ぐ最小限のチェックだけを行う。
+
+      - name: JavaScript 構文チェック
+        shell: bash
+        run: |
+          set -eu
+          find . -name '*.js' -not -path './.git/*' -print0 \
+            | while IFS= read -r -d '' f; do
+                node --check "$f"
+                echo "  ok: $f"
+              done
+
+      - name: 必須ファイルの存在確認
+        shell: bash
+        run: |
+          set -eu
+          for f in index.html css/style.css js/content.js js/script.js; do
+            [ -f "$f" ] || { echo "  ✋ 必須ファイルがありません: $f"; exit 1; }
+            echo "  ok: $f"
+          done
+
+      - name: リンク切れチェック（index.html が参照するローカルファイル）
+        shell: bash
+        run: |
+          set -eu
+          missing=0
+          while IFS= read -r r; do
+            case "$r" in
+              http*|//*|'#'*|mailto:*|data:*|javascript:*) continue ;;
+            esac
+            path="${r%%#*}"
+            path="${path%%\?*}"
+            [ -n "$path" ] || continue
+            if [ -e "$path" ]; then
+              echo "  ok: $path"
+            else
+              echo "  ✋ 参照先が見つかりません: $path"
+              missing=1
+            fi
+          done < <(grep -oE '(src|href)="[^"]*"' index.html | sed -E 's/^(src|href)="//; s/"$//')
+          [ "$missing" = "0" ] || exit 1
