@@ -212,12 +212,22 @@
   }
 
   function finalCta(c, t, url) {
+    const pains = c.pains.map((p) => `<li class="pain__bubble">${p}</li>`).join("");
+    const rows = c.solutions
+      .map((r) => `<li class="solve__row"><p class="solve__pain">${r.pain}</p><p class="solve__give">${r.give}</p></li>`)
+      .join("");
     return `
-    <section class="section section--soft" id="line" aria-labelledby="final-cta-title">
+    <section class="section section--soft" id="line" aria-labelledby="pain-title">
       <div class="container">
+        <h2 class="heading" id="pain-title">${c.painHeading}</h2>
+        <ul class="pain">${pains}</ul>
+        <p class="bridge">${c.bridge}</p>
         <div class="cta-final">
           <h2 class="cta-final__title" id="final-cta-title">${c.heading}</h2>
-          ${paras(c.paragraphs)}
+          <p class="cta-final__lead">${c.lead}</p>
+          <p class="solve__label">${c.solutionsLabel}</p>
+          <ul class="solve">${rows}</ul>
+          <p class="cta-final__caution">${c.caution}</p>
           ${ext(url, c.buttonText, "btn--large")}
         </div>
         <div class="textbook">
