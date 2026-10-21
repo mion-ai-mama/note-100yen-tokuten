@@ -348,7 +348,6 @@ a:focus-visible, button:focus-visible {
   content: "…"; position: absolute; left: 14px; top: 14px; display: grid; place-items: center; width: 28px; height: 28px;
   border-radius: 50%; background: var(--c-pink-soft); color: var(--c-pink-deep); font: 700 16px/1 var(--font-serif);
 }
-.pain__bubble:nth-child(even) { margin-left: 16px; }
 .bridge {
   position: relative; margin: 32px 0 28px; padding-top: 36px; text-align: center;
   font-family: var(--font-serif); font-size: 17px; line-height: 1.85; color: var(--c-ink);
